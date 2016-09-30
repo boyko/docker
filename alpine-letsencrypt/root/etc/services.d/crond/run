@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv sh
+
+exec crond -f -d 8 -c /etc/crontabs -L /dev/stdout
