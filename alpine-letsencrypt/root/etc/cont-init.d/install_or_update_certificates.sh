@@ -1,34 +1,40 @@
 #! /usr/bin/with-contenv sh
 
-# The domains environment variable must be specified
+###################
+# Settings checks #
+###################
 
 if [ -z "${DOMAINS}" ]
 then
+    echo "ERROR: the DOMAINS environmental variable is required!"
     exit 1
 fi
 
-if [[ "${RENEW_AUTHENTICATOR}" != "WEBROOT" ]]
+if [ -z "${EMAIL}" ]
+then
+    echo "ERROR: the EMAIL environmental variable is required!"
+    exit 2
+fi
+
+
+if [[ "${RENEW_AUTHENTICATOR}" == "standalone" ]]
 then
     if [ -z "${RENEW_PRE_HOOK}" ] || [ -z "${RENEW_POST_HOOK}" ]
     then
-        # If we are not using the webroot authenticator then we must specify pre and post hooks for the standalone
-        # authenticator
-        exit 2
+        echo "Using the standalone authenticator without specifying RENEW_PRE_HOOK or RENEW_POST_HOOK"
+        exit 3
     fi
 fi
 
-if [ -z "${WEBROOT_AUTH_PATH}" ]
-then
-    export WEBROOT_AUTH_PATH=/etc/letsencrypt/webrootauth
-fi
+
+# Create the letsencrypt path if it does not exist and set user
 
 mkdir -p ${WEBROOT_AUTH_PATH}
 
+######################################
+# Options for the letsencrypt client #
+######################################
 
-set -- ${DOMAINS}
-FIRST_DOMAIN=$1
-
-CERT_PATH=/etc/letsencrypt/live/${FIRST_DOMAIN}
 
 for domain in ${DOMAINS}
 do
@@ -38,22 +44,34 @@ done
 
 SERVER_OPTS=""
 
-if [ -z "${DRY_RUN}" ]
+if [ "${PRODUCTION}" = false ]
 then
-    echo "==> Setting dry run options"
+    echo "==> Using staging server"
     SERVER_OPTS="--test-cert --server https://acme-staging.api.letsencrypt.org/directory"
+fi
+
+FORCE_RENEW_OPTS=""
+
+if [ "${FORCE_RENEW}" = true ]
+then
+    FORCE_RENEW_OPTS="--force-renew"
 fi
 
 
 CERTBOT_OPTS="--standalone --standalone-supported-challenges http-01 ${DOMAIN_OPTS} ${SERVER_OPTS} --email ${EMAIL} --agree-tos"
 
-echo "==> Launching certbot with options:"
-echo ${CERTBOT_OPTS}
+set -- ${DOMAINS}
+FIRST_DOMAIN=$1
+
+CERT_PATH=/etc/letsencrypt/live/${FIRST_DOMAIN}
 
 if [ ! -z "${CERT_PATH}" ]
 then
-    mkdir -p ${WEBROOT_AUTH_PATH}
+    echo "==> Launching certbot with options:"
+    echo ${CERTBOT_OPTS}
     certbot certonly ${CERTBOT_OPTS}
 else
-    certbot renew ${CERTBOT_OPTS}
+    echo "==> Renewing certificates with options:"
+    echo ${CERTBOT_OPTS}
+    certbot renew ${CERTBOT_OPTS} ${FORCE_RENEW_OPTS}
 fi
