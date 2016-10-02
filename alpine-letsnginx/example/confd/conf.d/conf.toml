@@ -1,6 +1,5 @@
-
 [template]
-src = "nginx.conf.tmpl"
+src = "site.conf.tmpl"
 dest = "/etc/nginx/conf.d/site.conf"
 keys = [
     "/domains"

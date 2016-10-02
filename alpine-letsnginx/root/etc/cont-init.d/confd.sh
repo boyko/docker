@@ -1,8 +1,4 @@
-#!/usr/bin/execlineb -P
+#!/usr/bin/with-contenv sh
 
-with-contenv
-multisubstitute
-{
-  import -i DOMAINS
-}
-confd --onetime -backend env
+echo "==> Running confd with backend ${CONFD_BACKEND}"
+confd --onetime -backend ${CONFD_BACKEND} --log-level=debug

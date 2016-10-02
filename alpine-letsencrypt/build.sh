@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-docker build -t amarov/alpine-letsencrypt .
+docker build --no-cache -t amarov/alpine-letsencrypt .

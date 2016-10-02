@@ -9,7 +9,7 @@ The follwing environmental variables are optional:
 
 - DRY_RUN: if specified (any value) certbot will be run against the staging server
 
-A cron job runs certbot renew every month. Only certificates near expiry are renewed. The automatic renewal expects that the web server accepts connections on port 80 and that it is able to respond to requests to 
+A cron job runs certbot renew on the first day of every month. Only certificates near expiry are renewed. The automatic renewal expects that the web server accepts connections on port 80 and that it is able to respond to requests to 
 
 	/.well-known/acme-challenge
 
@@ -20,4 +20,3 @@ An example nginx location that does the job is:
 	    add_header Content-Type application/jose+json;
 	}
 	
-The user running nginx must 

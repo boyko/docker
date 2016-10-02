@@ -1,0 +1,13 @@
+version: "2"
+services:
+  nginx:
+    build: ./
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAINS=8100715e.ngrok.io
+      - EMAIL=test@test.com
+      - RENEW_AUTHENTICATOR=WEBROOT
+      - FORCE_RENEW=true
+      - CONFD_BACKEND=env
