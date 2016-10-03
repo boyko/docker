@@ -1,12 +1,27 @@
 
 server {
     listen 80;
-    server_name {{getenv "DOMAINS"}};
+    server_name {{ getenv "DOMAINS" }};
 
     location /.well-known/acme-challenge {
         alias {{getenv "WEBROOT_AUTH_PATH"}}.well-known/acme-challenge;
         add_header Content-Type application/jose+json;
     }
+
+    location / {
+        alias /etc/nginx/;
+    }
+}
+
+{{ $domains_split := split (getenv "DOMAINS") " " }}
+
+server {
+    listen 443;
+    server_name {{ getenv "DOMAINS" }};
+
+    ssl on;
+    ssl_certificate /etc/letsencrypt/live/{{index $domains_split 0}}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{index $domains_split 0}}/privkey.pem;
 
     location / {
         alias /etc/nginx/;
